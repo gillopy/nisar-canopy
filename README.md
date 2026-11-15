@@ -27,6 +27,28 @@ Cada corrida queda en un panel de trabajos con historial, log, imágenes, JSON y
 log guarda el plan exacto de comandos: un resultado se puede reproducir, no es una captura
 de pantalla.
 
+Con la verificación **Sentinel-2** activa, el análisis de cambio escribe además un panel de
+**NDVI, NDBI y NDWI** (antes, después y delta) sobre la misma grilla del radar, así se puede
+comparar la firma óptica con la caída de HV píxel a píxel.
+
+## Caché de Sentinel-2
+
+Las lecturas ópticas son remotas y caras: cada ítem son 3 aperturas (5 si se piden los
+índices). El compuesto se guarda en disco y se reutiliza tal cual.
+
+- **Ubicación**: `NISAR_S2_CACHE`; si no está, `<NISAR_MEDIA>/cache/s2`; si no, el temporal
+  del sistema. En la app queda junto a los artefactos.
+- **Clave**: caja, fecha, resolución, grilla de destino, bandas y **los ids de los ítems**.
+  Si cambiás `--nubes`, `--dias` o `--max-items`, cambia la búsqueda y se recalcula: nunca
+  devuelve un compuesto de otra búsqueda.
+- **Borrar**: la carpeta se puede borrar en cualquier momento, solo cuesta bajarlo de nuevo.
+  Ocupa unos 6 MB por entrada de índices a 1200 px.
+- **Medido**: una corrida de cambio con índices pasó de **108 s** (caché fría) a **18 s**
+  (tibia).
+
+`--max-items` viene en 4. Medido sobre la misma caja: con 2 ítems la cobertura fue 97,4% y
+con 8, 97,8%, por 65% más de tiempo. Más ítems agregan poco salvo en zonas muy nubladas.
+
 ## Requisitos
 
 | Cosa | Para qué | Obligatorio |

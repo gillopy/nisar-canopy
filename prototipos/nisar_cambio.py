@@ -102,6 +102,11 @@ def main() -> int:
         help="confirmar la caida de HV con NDVI de Sentinel-2 (pre y post)",
     )
     ap.add_argument(
+        "--indices",
+        default=None,
+        help="ademas del cambio, escribir un panel NDVI/NDBI/NDWI (antes, despues, delta)",
+    )
+    ap.add_argument(
         "--confirmar-temporal",
         type=int,
         default=0,
@@ -132,7 +137,15 @@ def main() -> int:
     )
     ap.add_argument("--dias", type=int, default=15, help="ventana de Sentinel-2 en dias")
     ap.add_argument("--nubes", type=float, default=40.0, help="nubes maximas de Sentinel-2")
-    ap.add_argument("--max-items", type=int, default=8, help="items maximos de Sentinel-2")
+    ap.add_argument(
+        "--max-items",
+        type=int,
+        default=4,
+        help=(
+            "items maximos de Sentinel-2 (medido: 2 items dan 97.4% de cobertura "
+            "y 8 dan 97.8% por 65% mas de tiempo)"
+        ),
+    )
     ap.add_argument("--rango", type=float, default=6.0, help="rango de la paleta de delta en dB")
     ap.add_argument("--out", required=True)
     ap.add_argument("--geojson", default=None)
@@ -251,6 +264,35 @@ def main() -> int:
                     return None, usados, "el compuesto NDVI quedo vacio"
                 return ndvi, usados, ""
             except Exception as exc:  # noqa: BLE001 - sin optico se sigue con HV
+                return None, [], f"{type(exc).__name__}: {exc}"
+
+        def _indices(fecha_texto: str):
+            """NDVI, NDBI y NDWI compuestos; (None, [], motivo) si falla."""
+            if not sentinel2.DISPONIBLE:
+                return None, [], "faltan rasterio/pystac-client"
+            try:
+                fecha = datetime.strptime(fecha_texto[:10], "%Y-%m-%d").date()
+                items = sentinel2.buscar_items(
+                    (oeste, sur, este, norte),
+                    fecha,
+                    int(args.dias),
+                    float(args.nubes),
+                    int(args.max_items),
+                )
+                if not items:
+                    return None, [], f"sin Sentinel-2 cerca de {fecha_texto[:10]}"
+                capas, usados = sentinel2.componer_indices(
+                    items,
+                    (oeste, sur, este, norte),
+                    db_antes.shape,
+                    transform,
+                    crs,
+                    px,
+                )
+                if not capas:
+                    return None, usados, "el compuesto de indices quedo vacio"
+                return capas, usados, ""
+            except Exception as exc:  # noqa: BLE001 - el panel es opcional
                 return None, [], f"{type(exc).__name__}: {exc}"
 
         if args.bosque == "ndvi" or args.verificar_s2:
@@ -405,6 +447,33 @@ def main() -> int:
                     optico_meta["motivo"] = motivo
         if not args.verificar_s2 or not optico_meta["disponible"]:
             optico_meta["motivo"] = optico_meta["motivo"] or "sin verificar"
+
+        if args.indices:
+            capas_antes, usados_a, motivo_a = _indices(antes.fecha)
+            capas_despues, usados_d, motivo_d = _indices(despues.fecha)
+            if capas_antes is None or capas_despues is None:
+                print(
+                    "aviso: sin panel de indices "
+                    f"({motivo_a or motivo_d or 'sin datos'})"
+                )
+            else:
+                try:
+                    import poster_indices
+
+                    titulo = (
+                        f"Sentinel-2 L2A · {antes.fecha[:10]} vs {despues.fecha[:10]} · "
+                        f"{len(usados_a)}+{len(usados_d)} item(s)"
+                    )
+                    panel = poster_indices.dibujar_panel(
+                        capas_antes, capas_despues, args.indices, titulo=titulo
+                    )
+                    print(f"indices: {panel}")
+                except Exception as exc:  # noqa: BLE001 - el panel es opcional
+                    print(
+                        "aviso: no pude dibujar el panel "
+                        f"({type(exc).__name__}: {exc})"
+                    )
+
         candidato_mask = perdida_radar & ~perdida
         if args.ganancia:
             ganancia = nisar.mayoria3(valido & (delta > umbral)) & valido

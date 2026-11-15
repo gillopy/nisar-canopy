@@ -7,6 +7,8 @@ reproyectar las imágenes.
 """
 from __future__ import annotations
 
+import warnings
+
 import numpy as np
 
 #: Clases SCL que no sirven para NDVI: nodata, saturado, sombra, nubes, cirrus,
@@ -34,14 +36,29 @@ COLORES = np.array(
 )
 
 
+def _diferencia_normalizada(a: np.ndarray, b: np.ndarray) -> np.ndarray:
+    """(a - b) / (a + b), NaN donde la suma no es positiva. Base de los indices."""
+    a = np.asarray(a, dtype=np.float32)
+    b = np.asarray(b, dtype=np.float32)
+    suma = a + b
+    salida = np.full(suma.shape, np.nan, dtype=np.float32)
+    np.divide(a - b, suma, out=salida, where=suma > 0)
+    return salida
+
+
 def ndvi(rojo: np.ndarray, nir: np.ndarray) -> np.ndarray:
     """NDVI = (NIR - rojo) / (NIR + rojo), NaN donde la suma no es positiva."""
-    rojo = np.asarray(rojo, dtype=np.float32)
-    nir = np.asarray(nir, dtype=np.float32)
-    suma = nir + rojo
-    salida = np.full(suma.shape, np.nan, dtype=np.float32)
-    np.divide(nir - rojo, suma, out=salida, where=suma > 0)
-    return salida
+    return _diferencia_normalizada(nir, rojo)
+
+
+def ndbi(swir: np.ndarray, nir: np.ndarray) -> np.ndarray:
+    """NDBI = (SWIR - NIR) / (SWIR + NIR). Sube cuando hay suelo desnudo."""
+    return _diferencia_normalizada(swir, nir)
+
+
+def ndwi(verde: np.ndarray, nir: np.ndarray) -> np.ndarray:
+    """NDWI = (verde - NIR) / (verde + NIR). Sube con agua en superficie."""
+    return _diferencia_normalizada(verde, nir)
 
 
 def mascara_scl(scl: np.ndarray) -> np.ndarray:
@@ -50,11 +67,18 @@ def mascara_scl(scl: np.ndarray) -> np.ndarray:
 
 
 def compuesto_mediana(ndvis: list[np.ndarray]) -> np.ndarray:
-    """Mediana pixel a pixel de los NDVI ya alineados a la misma grilla."""
+    """Mediana pixel a pixel de los NDVI ya alineados a la misma grilla.
+
+    Un pixel puede quedar sin ninguna observacion valida (nubes en todas las
+    fechas). Eso no es un error: el resultado queda NaN y el llamador informa la
+    cobertura. Se silencia el RuntimeWarning para no llenar el log de la app.
+    """
     if not ndvis:
         raise ValueError("No hay NDVI para componer")
     pila = np.stack([np.asarray(valor, dtype=np.float32) for valor in ndvis])
-    return np.nanmedian(pila, axis=0).astype(np.float32)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", RuntimeWarning)
+        return np.nanmedian(pila, axis=0).astype(np.float32)
 
 
 def clasificar(
