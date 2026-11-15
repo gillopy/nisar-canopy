@@ -35,7 +35,8 @@ de pantalla.
 Con la verificación **Sentinel-2** activa, el análisis de cambio escribe además un panel de
 **NDVI, NDBI, NDWI y NBR** (antes, después y delta) sobre la misma grilla del radar, así se
 puede comparar la firma óptica con la caída de HV píxel a píxel. NBR usa **SWIR2 (B12)**, la
-banda que separa dosel de suelo donde el NDVI satura; su delta es el **dNBR**.
+banda que separa dosel de suelo donde el NDVI satura; su delta (después − antes) es el
+negativo del dNBR estándar, así que una pérdida aparece en negativo.
 
 ## Capturas
 
@@ -74,8 +75,9 @@ suelo desnudo arriba. Es la contracara óptica del panel de radar, píxel a píx
 misma grilla.
 
 La captura es del panel anterior: desde la incorporación de **NBR** el panel suma una cuarta
-fila con NBR antes/después y su delta (dNBR), con escala de delta propia. dNBR es el estándar
-de severidad de cambio en bosque; los cortes de referencia (USGS) son 0,1 / 0,27 / 0,66.
+fila con NBR antes/después y su delta, con escala propia (±0,6). Todas las columnas de delta
+van **después − antes**, así que el dNBR estándar (antes − después) es el negativo de esa
+columna: los cortes de referencia del USGS, 0,1 / 0,27 / 0,66, se leen como valores negativos.
 
 ### Humedad del suelo (SME2)
 

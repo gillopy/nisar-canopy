@@ -47,3 +47,10 @@ Sentinel-2 sobre el caso Chaco.
   El panel de 4 filas se renderizó y se revisó a ojo.
 - **L5** — Queda a decisión del autor si avanzamos con BSI/B02, con dNBR como segunda
   confirmación óptica del cambio, o si NBR se queda sólo como capa de visualización.
+- **L6** — Verificación independiente: S1-S4 cumplen; sin bloqueantes. Hallazgo no bloqueante
+  corregido en documentación: las columnas de delta van **después − antes**, así que el valor
+  mostrado es el **negativo** del dNBR estándar (USGS define antes − después); el signo no
+  cambia la escala ni el render, pero la ficha y el README ahora lo dicen explícito. No se
+  agregó test automático: el venv del backend no tiene numpy a propósito (el backend no carga
+  dependencias del pipeline) y el repo no tiene runner para `comun/`, así que la evidencia es
+  la corrida real de L4.

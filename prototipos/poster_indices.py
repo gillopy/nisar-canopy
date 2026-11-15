@@ -4,8 +4,8 @@ Se dibuja sobre la grilla del recorte NISAR (las capas ya vienen alineadas), asi
 se puede superponer o comparar con el cambio de HV. Los deltas usan una escala
 divergente centrada en cero; las capas usan la paleta propia de cada indice.
 
-NBR usa SWIR2 (B12) y su delta es el dNBR, el estandar de severidad de cambio en
-bosque; por eso lleva una escala de delta mas ancha que el resto.
+NBR usa SWIR2 (B12); su delta es el negativo del dNBR estandar (todas las columnas
+van despues - antes), por eso lleva una escala de delta mas ancha que el resto.
 
 Uso como modulo: `dibujar_panel(antes, despues, salida, ...)`.
 """
