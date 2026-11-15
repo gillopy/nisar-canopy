@@ -59,6 +59,10 @@ HV antes y después, lado a lado. Pérdida 419 ha (0,1%) con `dHV < -2,5 dB`, `o
 20 m/px. **Rojo** es pérdida confirmada por el NDVI de Sentinel-2; **naranja**, pérdida
 candidata que el radar vio y la máscara de bosque no llegó a confirmar.
 
+Debajo de los resultados, **Comparar antes/después** abre una ventana flotante con las dos
+capas apiladas: se arrastra la línea con el mouse y el antes queda a la izquierda, el después
+con la máscara a la derecha. El pipeline deja esas capas como `*_antes.png` y `*_despues.png`.
+
 ### Firma óptica (Sentinel-2)
 
 ![Batería de índices Sentinel-2: NDVI, NDBI y NDWI en antes, después y delta, sobre la misma grilla que el radar](docs/capturas/sentinel-2-indices.jpg)

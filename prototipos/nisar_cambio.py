@@ -7,6 +7,8 @@ en potencia), calcula ΔHV en dB, le resta el corrimiento global del par, aplica
 una mayoria 3x3 para no contar pixeles aislados y escribe:
 
 - un PNG (delta, mascara sobre HV o composicion RGB),
+- en el modo ``comparar``, las dos capas sueltas (``*_antes.png`` y
+  ``*_despues.png``) que alimentan el comparador de barrido del visor,
 - un JSON con hectareas de perdida/ganancia y los umbrales usados.
 
 Dos cosas que el producto anterior no hacia y que dominan el resultado:
@@ -56,6 +58,25 @@ import sentinel2  # noqa: E402
 ROJO = np.array([205, 35, 35], dtype=np.uint8)
 NARANJA = np.array([222, 138, 58], dtype=np.uint8)
 AZUL = np.array([45, 95, 205], dtype=np.uint8)
+
+
+def _guardar_panel(ruta: Path, rgb: np.ndarray, px: int) -> Path:
+    """Guarda una capa suelta del comparador: sin pie ni barra de escala.
+
+    El compuesto lleva las dos capas juntas y un pie con la leyenda; el visor
+    necesita cada capa por separado para el barrido. Se guardan al tamano que
+    ocupan dentro del compuesto para no duplicar el peso del PNG.
+    """
+    from PIL import Image  # import local: solo lo usa el modo comparar
+
+    alto, ancho = rgb.shape[:2]
+    ancho_salida, alto_salida = nisar.dimensiones(ancho, alto, px)
+    imagen = Image.fromarray(np.clip(rgb, 0, 255).astype(np.uint8), "RGB")
+    if (ancho_salida, alto_salida) != (ancho, alto):
+        imagen = imagen.resize((ancho_salida, alto_salida), Image.LANCZOS)
+    ruta.parent.mkdir(parents=True, exist_ok=True)
+    imagen.save(ruta, "PNG", optimize=True)
+    return ruta
 
 
 def main() -> int:
@@ -505,6 +526,7 @@ def main() -> int:
         perdida_bosque_pct = 100.0 * perdida_px / max(1, bosque_px)
         delta_medio = float(np.nanmean(delta[perdida])) if perdida_px else 0.0
 
+        paneles_meta: dict[str, str] = {}
         if args.modo == "delta":
             norm = np.clip((delta + rango) / (2.0 * rango), 0.0, 1.0)
             rgb = nisar.paleta("RdBu", norm)
@@ -565,6 +587,21 @@ def main() -> int:
                 )
             rgb = np.asarray(lienzo)
             px = min(4096, rgb.shape[1])
+            # Capas sueltas para el comparador de barrido del visor. El nombre
+            # (``_antes``/``_despues``) es el contrato con el frontend: no corta
+            # el compuesto, apila las dos capas y las arrastra.
+            paneles_meta = {
+                "antes": _guardar_panel(
+                    salida.with_name(f"{salida.stem}_antes.png"),
+                    gris_antes,
+                    max(1, px // 2),
+                ).name,
+                "despues": _guardar_panel(
+                    salida.with_name(f"{salida.stem}_despues.png"),
+                    gris_despues,
+                    max(1, px // 2),
+                ).name,
+            }
         else:
             vmin, vmax = nisar.limites(db_despues)
             base = nisar.paleta("gray", nisar.normalizar(db_despues, vmin, vmax))
@@ -613,6 +650,7 @@ def main() -> int:
         )
         meta = {
             "producto": "cambio",
+            **({"paneles": paneles_meta} if paneles_meta else {}),
             "antes": antes.ruta.stem,
             "despues": despues.ruta.stem,
             "fecha_antes": antes.fecha,
