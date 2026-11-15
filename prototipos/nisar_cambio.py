@@ -142,8 +142,8 @@ def main() -> int:
         type=int,
         default=4,
         help=(
-            "items maximos de Sentinel-2 (medido: 2 items dan 97.4% de cobertura "
-            "y 8 dan 97.8% por 65% mas de tiempo)"
+            "items maximos de Sentinel-2 (medido: 2 items dan 97.4%% de cobertura "
+            "y 8 dan 97.8%% por 65%% mas de tiempo)"
         ),
     )
     ap.add_argument("--rango", type=float, default=6.0, help="rango de la paleta de delta en dB")

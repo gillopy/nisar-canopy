@@ -101,6 +101,11 @@ docker compose up -d
 La app escucha en `http://127.0.0.1:8010` (o el `PORT` de tu `.env`). Los `.h5` se montan
 desde `NISAR_DATA` y los artefactos desde `NISAR_MEDIA`.
 
+La caché de Sentinel-2 vive dentro del volumen de artefactos
+(`/app/nisar-app/var/media/cache/s2`): sobrevive a los reinicios del contenedor y se borra
+junto con los artefactos. El límite administrativo de GADM no entra en la imagen
+(`.dockerignore`), así que el preset de Paraguay responde 404 igual que en un clon limpio.
+
 > La app ejecuta subprocesos y no tiene autenticación: escucha solo en loopback a propósito.
 > Para exponerla a Internet hace falta un proxy con HTTPS y, si es pública, un modo demo con
 > artefactos precalculados y límites de descarga.

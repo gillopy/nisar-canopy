@@ -4,8 +4,13 @@ nisar-app/var/
 nisar-app/frontend/node_modules/
 **/__pycache__/
 **/*.pyc
+*.log
 .env
 nisar-app/.env
-run-test*.log
 .git/
 .gitignore
+.atl/
+.opencode/
+
+# GADM no se redistribuye: no tiene que quedar horneado en la imagen.
+datos/paraguay_gadm.json

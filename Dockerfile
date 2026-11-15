@@ -9,7 +9,8 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     CLIMATE3D_CONTENEDOR=1 \
     CLIMATE3D_DATOS=/data \
     CLIMATE3D_NISAR=/data/nisar \
-    CLIMATE3D_PYTHON=/usr/local/bin/python
+    CLIMATE3D_PYTHON=/usr/local/bin/python \
+    NISAR_S2_CACHE=/app/nisar-app/var/media/cache/s2
 
 # curl: healthcheck. libgomp1: wheel de rasterio/numpy.
 # libexpat1: el wheel de rasterio lo exige en runtime; sin el, el import falla
@@ -32,6 +33,8 @@ RUN pip install --upgrade pip \
  && pip install -r requirements-pipeline.txt -r backend-requirements.txt
 
 # Pipeline compartido + app + frontend ya compilado.
+# prototipos/ incluye poster_indices.py (panel NDVI/NDBI/NDWI); matplotlib ya
+# viene en requirements-pipeline.txt.
 COPY comun ./comun
 COPY descargar ./descargar
 COPY prototipos ./prototipos
@@ -39,9 +42,11 @@ COPY datos ./datos
 COPY nisar-app/nisar_backend ./nisar-app/nisar_backend
 COPY nisar-app/frontend/dist ./nisar-app/frontend/dist
 
+# La cache de Sentinel-2 se crea vacia y con dueno correcto antes de arrancar:
+# si la creara la app en runtime, el volumen montado podria no ser escribible.
 RUN useradd --create-home --uid 1000 --shell /bin/bash appuser \
- && mkdir -p /app/nisar-app/var/media /app/nisar-app/var/nisar/cache \
- && chown -R appuser:appuser /app/nisar-app/var
+  && mkdir -p /app/nisar-app/var/media/cache/s2 /app/nisar-app/var/nisar/cache \
+  && chown -R appuser:appuser /app/nisar-app/var
 
 USER appuser
 
