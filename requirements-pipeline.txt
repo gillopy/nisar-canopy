@@ -1,0 +1,12 @@
+# Dependencias del pipeline NISAR (entorno de la raiz: .venv).
+# El backend usa su propio entorno: nisar-app/.venv.
+requests==2.34.*
+numpy==2.5.*
+pillow==13.0.*
+matplotlib==3.11.*
+h5py==3.16.*
+pyproj==3.8.*
+tifffile==2026.11.*
+rasterio==1.5.*
+pystac-client==0.9.*
+planetary-computer==1.*

@@ -1,0 +1,52 @@
+# ---------------------------------------------------------------------------
+# Entornos de Python: los crea setup.ps1 y no son portables entre maquinas.
+# ---------------------------------------------------------------------------
+.venv/
+nisar-app/.venv/
+__pycache__/
+*.py[cod]
+
+# ---------------------------------------------------------------------------
+# Estado local de la app: trabajos, artefactos, historial y cache de browse.
+# ---------------------------------------------------------------------------
+nisar-app/var/
+
+# ---------------------------------------------------------------------------
+# Frontend: node_modules se reconstruye con "npm install".
+# El build (frontend/dist) SI se versiona: permite clonar y correr sin Node.
+# ---------------------------------------------------------------------------
+nisar-app/frontend/node_modules/
+*.tsbuildinfo
+
+# ---------------------------------------------------------------------------
+# Credenciales y configuracion local. Nunca versionar.
+#   .env            -> carpetas de datos y puerto
+#   nisar-app/.env  -> EARTHDATA_USER, EARTHDATA_PASSWORD, FIRMS_MAP_KEY
+# ---------------------------------------------------------------------------
+.env
+**/.env
+
+# ---------------------------------------------------------------------------
+# Registros de ejecucion
+# ---------------------------------------------------------------------------
+*.log
+
+# ---------------------------------------------------------------------------
+# Datos satelitales: pesan GB y no son parte del codigo.
+# ---------------------------------------------------------------------------
+*.h5
+*.hdf5
+
+# ---------------------------------------------------------------------------
+# Limite administrativo GADM. Su licencia permite uso academico y no
+# comercial, pero NO permite redistribuir el archivo. Se descarga aparte.
+# Ver "Limite de Paraguay" en el README.
+# ---------------------------------------------------------------------------
+datos/paraguay_gadm.json
+
+# ---------------------------------------------------------------------------
+# Sistema
+# ---------------------------------------------------------------------------
+Thumbs.db
+desktop.ini
+.DS_Store

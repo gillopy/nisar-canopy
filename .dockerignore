@@ -1,0 +1,11 @@
+.venv/
+nisar-app/.venv/
+nisar-app/var/
+nisar-app/frontend/node_modules/
+**/__pycache__/
+**/*.pyc
+.env
+nisar-app/.env
+run-test*.log
+.git/
+.gitignore

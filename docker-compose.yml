@@ -1,0 +1,32 @@
+name: nisar
+
+services:
+  app:
+    build:
+      context: .
+    image: nisar-app:local
+    # Credenciales de Earthdata si existe nisar-app\.env; no se hornean en la imagen.
+    env_file:
+      - path: nisar-app/.env
+        required: false
+    environment:
+      CLIMATE3D_CONTENEDOR: "1"
+      CLIMATE3D_PYTHON: /usr/local/bin/python
+      CLIMATE3D_NISAR: /data/nisar
+      CLIMATE3D_DATOS: /data
+      NISAR_MEDIA: /app/nisar-app/var/media
+    ports:
+      # Solo loopback: la app ejecuta subprocesos y no tiene autenticacion.
+      - "127.0.0.1:${PORT:-8010}:8010"
+    volumes:
+      # .h5 NISAR y artefactos: el usuario elige ambas carpetas en el host.
+      - "${NISAR_DATA:-D:/nisar}:/data/nisar"
+      - "${NISAR_MEDIA:-./nisar-app/var/media}:/app/nisar-app/var/media"
+    restart: unless-stopped
+    stop_grace_period: 30s
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8010/api/health"]
+      interval: 15s
+      timeout: 5s
+      start_period: 30s
+      retries: 5
