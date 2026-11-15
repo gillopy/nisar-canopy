@@ -180,6 +180,26 @@ def main() -> int:
         db_despues = nisar.a_db(hv_despues)
         delta = db_despues - db_antes
         valido = np.isfinite(delta)
+        if not valido.any():
+            px_antes = int(np.isfinite(db_antes).sum())
+            px_despues = int(np.isfinite(db_despues).sum())
+            detalle = (
+                "La caja no tiene pixeles validos en las dos fechas.\n"
+                f"  antes   ({Path(args.antes).name}): {px_antes} de {db_antes.size} px\n"
+                f"  despues ({Path(args.despues).name}): {px_despues} de {db_despues.size} px\n"
+            )
+            if px_antes == 0 or px_despues == 0:
+                detalle += (
+                    "  Una escena no tiene datos en esa caja: pasa cuando la caja cae\n"
+                    "  fuera de la huella con datos del granulo, o el producto la enmascara.\n"
+                    "  Movela o achicala hacia el centro de la escena."
+                )
+            else:
+                detalle += (
+                    "  Las dos tienen datos pero no quedan alineados despues del\n"
+                    "  multilook: revisa que sean el mismo track/frame y la misma version."
+                )
+            raise SystemExit(detalle)
         offset_db = 0.0
         if not args.sin_normalizar:
             offset_db = nisar.corrimiento_db(delta, valido)
@@ -394,8 +414,6 @@ def main() -> int:
             ganancia = np.zeros(valido.shape, dtype=bool)
 
         pixeles_validos = int(valido.sum())
-        if pixeles_validos == 0:
-            raise SystemExit("La caja no tiene pixeles validos en las dos fechas.")
         area_px_ha = mpp_x * mpp_y / 10000.0
         minimo_px = 0
         candidato = candidato_mask
