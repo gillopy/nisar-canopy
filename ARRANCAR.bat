@@ -22,19 +22,23 @@ echo    NISAR - instalar y arrancar (local)
 echo ==========================================
 echo.
 
-echo [1/4] Verificando Python...
+echo [1/4] Verificando Python o uv...
+where uv >nul 2>&1
+if not errorlevel 1 goto python_ok
 where py >nul 2>&1
 if not errorlevel 1 goto python_ok
 where python >nul 2>&1
 if not errorlevel 1 goto python_ok
 
 echo.
-echo [x] No encontre Python.
+echo [x] No encontre ni Python ni uv.
 echo.
 echo     1. Se va a abrir la pagina de descarga.
-echo     2. Instala Python 3.11 o superior.
+echo     2. Instala Python 3.12 o superior.
 echo     3. Marca "Add python.exe to PATH" en el instalador.
 echo     4. Volve a ejecutar este archivo.
+echo.
+echo     Alternativa mas rapida: winget install astral-sh.uv
 echo.
 pause
 start "" "https://www.python.org/downloads/"

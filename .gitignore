@@ -50,3 +50,9 @@ datos/paraguay_gadm.json
 Thumbs.db
 desktop.ini
 .DS_Store
+
+# ---------------------------------------------------------------------------
+# Artefactos de herramientas locales (no son parte del proyecto)
+# ---------------------------------------------------------------------------
+.atl/
+.opencode/
