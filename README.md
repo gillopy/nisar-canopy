@@ -290,7 +290,11 @@ camino de respaldo y para la imagen Docker.
   [ASF DAAC](https://search.asf.alaska.edu/). Acceso con Earthdata Login.
 - **Sentinel-2 L2A**: ESA Copernicus, vía [Microsoft Planetary Computer](https://planetarycomputer.microsoft.com/).
 - **FIRMS**: NASA EOSDIS, para los focos de calor del producto incendio.
-- **OpenStreetMap**: mapa base del visor.
+- **OpenStreetMap**: mapa base del visor (© OpenStreetMap contributors, ODbL).
+
+Las licencias completas de lo que el repositorio **redistribuye** (fuentes, Leaflet, React),
+el detalle de lo que solo se **instala** y de lo que se **descarga** en tiempo de ejecución
+están en [THIRD-PARTY.md](THIRD-PARTY.md).
 
 NISAR es una misión conjunta de NASA y la Indian Space Research Organisation. Este proyecto
 es de participantes del NASA Space Apps Challenge: no es un producto de NASA.

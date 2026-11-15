@@ -50,6 +50,10 @@ COPY datos ./datos
 COPY nisar-app/nisar_backend ./nisar-app/nisar_backend
 COPY nisar-app/frontend/dist ./nisar-app/frontend/dist
 
+# Licencias del material de terceros que viaja en la imagen.
+COPY THIRD-PARTY.md ./
+COPY LICENSES ./LICENSES
+
 # La cache de Sentinel-2 se crea vacia y con dueno correcto antes de arrancar:
 # si la creara la app en runtime, el volumen montado podria no ser escribible.
 RUN useradd --create-home --uid 1000 --shell /bin/bash appuser \
