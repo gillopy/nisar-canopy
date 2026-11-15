@@ -36,6 +36,51 @@ Con la verificación **Sentinel-2** activa, el análisis de cambio escribe adem�
 **NDVI, NDBI y NDWI** (antes, después y delta) sobre la misma grilla del radar, así se puede
 comparar la firma óptica con la caída de HV píxel a píxel.
 
+## Capturas
+
+Todas salen del caso de estudio del Chaco, track/frame 39/99. El cambio de cobertura y los
+índices ópticos son la misma corrida (2026-06-21 → 2026-10-31); la consola y la humedad del
+suelo vienen de otras fechas.
+
+### La consola
+
+![Consola de NISAR Canopy: panel de análisis a la izquierda, mapa con las huellas de las escenas al centro y artefactos del trabajo a la derecha](docs/capturas/consola.jpg)
+
+A la izquierda, qué se va a correr: producto, tamaño, fechas, modo, umbral de dB. Al centro,
+el mapa con la caja dibujada y las huellas de las escenas que la cruzan. A la derecha, los
+artefactos del último trabajo y sus estadísticas: área, bosque, pérdida radar y pérdida
+candidata.
+
+### Cambio de cobertura (GCOV)
+
+![Cambio HV entre el 2026-06-21 y el 2026-10-31: antes y después lado a lado, con los píxeles de pérdida marcados en rojo y naranja](docs/capturas/cambio-gcov-hv.jpg)
+
+HV antes y después, lado a lado. Pérdida 419 ha (0,1%) con `dHV < -2,5 dB`, `offset -1,1 dB`,
+20 m/px. **Rojo** es pérdida confirmada por el NDVI de Sentinel-2; **naranja**, pérdida
+candidata que el radar vio y la máscara de bosque no llegó a confirmar.
+
+### Firma óptica (Sentinel-2)
+
+![Batería de índices Sentinel-2: NDVI, NDBI y NDWI en antes, después y delta, sobre la misma grilla que el radar](docs/capturas/sentinel-2-indices.jpg)
+
+El mismo par de fechas en tres índices y tres columnas, 4 + 4 ítems del compuesto. El delta
+medio de NDVI es **-0,114**, el de NDBI **+0,134** y el de NDWI **+0,082**: verde abajo,
+suelo desnudo arriba. Es la contracara óptica del panel de radar, píxel a píxel y sobre la
+misma grilla.
+
+### Humedad del suelo (SME2)
+
+![Mapa de humedad del suelo DSG a 200 m sobre el Chaco, con la media y los percentiles en el pie](docs/capturas/sme2-dsg.jpg)
+
+DSG a 200 m del 2026-09-29: 100% de la caja con dato, media 0,271 m³/m³. En la escala, azul
+es más húmedo y amarillo pálido más seco: las parcelas agrícolas marcan el contraste.
+
+![Comparación de los tres algoritmos SME2 —DSG, PMI y TSR— sobre la misma escena, con mediana y cobertura válida anotadas](docs/capturas/sme2-comparar.jpg)
+
+Los tres algoritmos sobre la misma escena, con su mediana y su cobertura válida: DSG conserva
+el **29%** de los píxeles, PMI el 6% y TSR el 0%. Por eso el producto de comparación existe:
+en el Chaco, DSG es el que más superficie deja ver.
+
 ## Caché de Sentinel-2
 
 Las lecturas ópticas son remotas y caras: cada ítem son 3 aperturas (5 si se piden los
@@ -272,6 +317,7 @@ búsquedas reales contra ASF se comprueban a mano.
 ├── descargar/            descarga de escenas desde ASF
 ├── prototipos/           renderizadores NISAR (GCOV, SME2, GUNW)
 ├── datos/                recursos auxiliares del pipeline
+├── docs/                 capturas de este README
 └── nisar-app/
     ├── pyproject.toml    dependencias del backend
     ├── uv.lock           resolucion fijada del backend
