@@ -1,0 +1,25 @@
+name: tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  tests:
+    name: Tests del backend
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Instalar uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.13.8"
+
+      - name: Sincronizar el backend desde el lock
+        run: uv sync --frozen --directory nisar-app
+
+      - name: Correr los tests
+        run: nisar-app/.venv/bin/python -m unittest discover -s nisar-app/nisar_backend/tests -q

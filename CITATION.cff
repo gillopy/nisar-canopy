@@ -1,0 +1,25 @@
+cff-version: 1.2.0
+message: "Si usas NISAR Canopy en un trabajo, una clase o una nota, cita este repositorio."
+title: "NISAR Canopy"
+abstract: >-
+  Consola abierta para la misión NISAR (NASA-ISRO Synthetic Aperture Radar):
+  búsqueda de escenas en el archivo de ASF, descarga de productos GCOV, SME2 y GUNW,
+  y análisis de cambio en la superficie (cambio de cobertura, humedad del suelo a
+  200 m, interferometría de 12 días) con verificación óptica Sentinel-2.
+authors:
+  - family-names: "Cabrera"
+    given-names: "Guillermo"
+repository-code: "https://github.com/gillopy/nisar-canopy"
+url: "https://github.com/gillopy/nisar-canopy"
+license: MIT
+version: 0.1.0
+date-released: "2026-11-15"
+keywords:
+  - NISAR
+  - SAR
+  - radar
+  - remote sensing
+  - Earth observation
+  - NASA Space Apps
+  - deforestation
+  - interferometry

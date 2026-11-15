@@ -1,5 +1,10 @@
 # NISAR Canopy
 
+[![tests](https://github.com/gillopy/nisar-canopy/actions/workflows/ci.yml/badge.svg)](https://github.com/gillopy/nisar-canopy/actions/workflows/ci.yml)
+[![release](https://github.com/gillopy/nisar-canopy/actions/workflows/release.yml/badge.svg)](https://github.com/gillopy/nisar-canopy/actions/workflows/release.yml)
+[![imagen](https://img.shields.io/badge/ghcr.io-nisar--canopy-2496ED?logo=docker&logoColor=white)](https://github.com/gillopy/nisar-canopy/pkgs/container/nisar-canopy)
+[![licencia](https://img.shields.io/badge/licencia-MIT-blue.svg)](LICENSE)
+
 Consola abierta para la misión **NISAR** (NASA-ISRO Synthetic Aperture Radar):
 buscás escenas sobre un mapa, bajás el producto y corrés el análisis de cambio que elijas.
 Backend FastAPI, frontend React + Leaflet y un pipeline de radar en Python.
@@ -116,7 +121,28 @@ uv export --format requirements-txt --no-hashes --no-emit-project --output-file 
 Para agregar una dependencia: editá el `pyproject.toml` correspondiente, `uv lock`, y volvé
 a exportar los requirements para que el camino sin uv siga funcionando.
 
-## Modo Docker
+## Docker
+
+Hay dos caminos: usar la **imagen publicada** (no compilás nada) o construir la tuya.
+
+### Imagen publicada
+
+Cada release publica `ghcr.io/gillopy/nisar-canopy` con la etiqueta de la versión, la
+`major.minor` y `latest`.
+
+```bash
+docker run --rm -p 127.0.0.1:8010:8010 \
+  -v /ruta/a/los/h5:/data/nisar \
+  -v /ruta/a/artefactos:/app/nisar-app/var/media \
+  -e EARTHDATA_USER=tu_usuario \
+  -e EARTHDATA_PASSWORD=tu_clave \
+  ghcr.io/gillopy/nisar-canopy:latest
+```
+
+Después abrí `http://127.0.0.1:8010`. Sin las variables de Earthdata la app arranca igual:
+la búsqueda y el browse funcionan, solo no se pueden bajar los `.h5`.
+
+### Con los scripts
 
 ```powershell
 ARRANCAR.bat docker
@@ -144,6 +170,31 @@ más rápida que con `pip`.
 > La app ejecuta subprocesos y no tiene autenticación: escucha solo en loopback a propósito.
 > Para exponerla a Internet hace falta un proxy con HTTPS y, si es pública, un modo demo con
 > artefactos precalculados y límites de descarga.
+
+## Versiones, releases e imagen
+
+El repo usa **tags de git** como única fuente de verdad de las versiones. Un tag `vX.Y.Z` dispara
+`.github/workflows/release.yml`, que hace todo junto:
+
+1. Construye la imagen y la publica en **GitHub Container Registry** (`ghcr.io/gillopy/nisar-canopy`),
+   con etiquetas `X.Y.Z`, `X.Y` y `latest`.
+2. Publica la imagen con **SBOM y procedencia** adjuntas: se puede auditar con qué se construyó.
+3. Crea el **Release** en GitHub con las notas generadas del rango de commits.
+
+```bash
+git tag -a v0.2.0 -m "v0.2.0"
+git push origin v0.2.0
+```
+
+No hace falta tocar nada más. `main` corre los tests en cada push y en cada pull request
+(`.github/workflows/ci.yml`): si el lock queda desactualizado, `uv sync --frozen` falla y el
+build del release también.
+
+| Quiero | Comando |
+| --- | --- |
+| Ver las versiones | <https://github.com/gillopy/nisar-canopy/releases> |
+| Bajar la última imagen | `docker pull ghcr.io/gillopy/nisar-canopy:latest` |
+| Bajar una versión exacta | `docker pull ghcr.io/gillopy/nisar-canopy:0.1.0` |
 
 ## Modo manual (sin los `.bat`)
 
@@ -257,6 +308,35 @@ guardalo con ese nombre:
 - [geoBoundaries](https://www.geoboundaries.org/) — CC-BY 4.0.
 
 El resto de la app funciona sin ese archivo.
+
+## Uso de asistencia con IA
+
+El NASA Space Apps Challenge permite usar herramientas de inteligencia artificial y pide
+declararlo. En este proyecto se usaron modelos de lenguaje para:
+
+- escribir y revisar parte del código del backend, del frontend y de los scripts del pipeline;
+- redactar y ordenar la documentación;
+- contrastar decisiones de diseño y reproducir errores.
+
+**No** se usaron para generar imágenes ni audio, y **no** se usó ningún elemento de marca de
+NASA: la app no incluye logos, insignias ni identificadores gráficos de la misión.
+
+Las decisiones de alcance, la elección de las áreas de estudio, la interpretación de los
+resultados y la validación contra datos reales son del autor. Cada cifra del caso de estudio
+sale de un recorte de la escena y de un par de fechas que están declarados en el código.
+
+Si reusás este proyecto, revisá el código antes de confiar en él: es una herramienta de
+exploración, no un producto operativo.
+
+## Cómo citar
+
+El repo trae `CITATION.cff`, así que GitHub muestra un botón "Cite this repository".
+
+> Cabrera, G. (2026). *NISAR Canopy* (v0.1.0) [Software].
+> <https://github.com/gillopy/nisar-canopy>
+
+Si el trabajo usa el caso de estudio del Chaco, citá también los datos de origen: NISAR L2
+GCOV, NASA/ISRO, archivados por ASF DAAC.
 
 ## Problemas comunes
 
