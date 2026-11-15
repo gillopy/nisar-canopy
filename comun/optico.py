@@ -1,9 +1,9 @@
 """Utilidades ópticas puras (numpy) para la fusión con NISAR.
 
-Acá no hay rasterio ni STAC: solo NDVI, la máscara de clases SCL de Sentinel-2,
-el compuesto mediano y la clasificación rule-based. Así se puede probar sin red
-ni dependencias pesadas; el script `nisar_fusion.py` se encarga de bajar y
-reproyectar las imágenes.
+Acá no hay rasterio ni STAC: solo los índices espectrales (NDVI, NDBI, NDWI,
+NBR), la máscara de clases SCL de Sentinel-2, el compuesto mediano y la
+clasificación rule-based. Así se puede probar sin red ni dependencias pesadas;
+el script `nisar_fusion.py` se encarga de bajar y reproyectar las imágenes.
 """
 from __future__ import annotations
 
@@ -59,6 +59,16 @@ def ndbi(swir: np.ndarray, nir: np.ndarray) -> np.ndarray:
 def ndwi(verde: np.ndarray, nir: np.ndarray) -> np.ndarray:
     """NDWI = (verde - NIR) / (verde + NIR). Sube con agua en superficie."""
     return _diferencia_normalizada(verde, nir)
+
+
+def nbr(nir: np.ndarray, swir2: np.ndarray) -> np.ndarray:
+    """NBR = (NIR - SWIR2) / (NIR + SWIR2).
+
+    Índice de bosque: alto en dosel (0,6-0,8) y bajo en suelo desnudo o quemado.
+    Usa SWIR2 (B12), la banda que NDVI y NDBI no miran; su diferencia entre dos
+    fechas (dNBR) es el estándar de severidad de cambio en bosque.
+    """
+    return _diferencia_normalizada(nir, swir2)
 
 
 def mascara_scl(scl: np.ndarray) -> np.ndarray:

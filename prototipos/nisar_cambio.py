@@ -125,7 +125,7 @@ def main() -> int:
     ap.add_argument(
         "--indices",
         default=None,
-        help="ademas del cambio, escribir un panel NDVI/NDBI/NDWI (antes, despues, delta)",
+        help="ademas del cambio, escribir un panel NDVI/NDBI/NDWI/NBR (antes, despues, delta)",
     )
     ap.add_argument(
         "--confirmar-temporal",
@@ -288,7 +288,7 @@ def main() -> int:
                 return None, [], f"{type(exc).__name__}: {exc}"
 
         def _indices(fecha_texto: str):
-            """NDVI, NDBI y NDWI compuestos; (None, [], motivo) si falla."""
+            """NDVI, NDBI, NDWI y NBR compuestos; (None, [], motivo) si falla."""
             if not sentinel2.DISPONIBLE:
                 return None, [], "faltan rasterio/pystac-client"
             try:

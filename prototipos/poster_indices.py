@@ -1,8 +1,11 @@
-"""Panel de indices espectrales Sentinel-2: NDVI, NDBI y NDWI, antes/despues.
+"""Panel de indices espectrales Sentinel-2: NDVI, NDBI, NDWI y NBR, antes/despues.
 
 Se dibuja sobre la grilla del recorte NISAR (las capas ya vienen alineadas), asi que
 se puede superponer o comparar con el cambio de HV. Los deltas usan una escala
 divergente centrada en cero; las capas usan la paleta propia de cada indice.
+
+NBR usa SWIR2 (B12) y su delta es el dNBR, el estandar de severidad de cambio en
+bosque; por eso lleva una escala de delta mas ancha que el resto.
 
 Uso como modulo: `dibujar_panel(antes, despues, salida, ...)`.
 """
@@ -23,9 +26,14 @@ ESCALAS = {
     "ndvi": ("RdYlGn", -0.2, 0.9),
     "ndbi": ("BrBG", -0.6, 0.6),
     "ndwi": ("Blues", -0.6, 0.6),
+    "nbr": ("YlGn", -0.2, 0.9),
 }
 
-NOMBRES = {"ndvi": "NDVI", "ndbi": "NDBI", "ndwi": "NDWI"}
+#: Escala divergente del delta (simetrica) por indice. dNBR necesita mas rango:
+#: los cortes de severidad van de 0,27 a 0,66 y con +-0,4 se saturaba.
+ESCALAS_DELTA = {"ndvi": 0.4, "ndbi": 0.4, "ndwi": 0.4, "nbr": 0.6}
+
+NOMBRES = {"ndvi": "NDVI", "ndbi": "NDBI", "ndwi": "NDWI", "nbr": "NBR"}
 
 
 def _recortar(capa: np.ndarray, max_px: int) -> np.ndarray:
@@ -53,12 +61,12 @@ def dibujar_panel(
     titulo: str | None = None,
     max_px: int = 900,
 ) -> Path:
-    """Escribe un PNG 3x3: cada indice antes, despues y su delta.
+    """Escribe un PNG de N filas x 3: cada indice antes, despues y su delta.
 
     `antes` y `despues` son dicts con las claves que el llamador haya compuesto
-    (ndvi, ndbi, ndwi). Las capas ausentes se saltean sin romper el panel.
+    (ndvi, ndbi, ndwi, nbr). Las capas ausentes se saltean sin romper el panel.
     """
-    claves = [c for c in ("ndvi", "ndbi", "ndwi") if c in antes and c in despues]
+    claves = [c for c in ("ndvi", "ndbi", "ndwi", "nbr") if c in antes and c in despues]
     if not claves:
         raise ValueError("no hay indices para dibujar")
 
@@ -80,13 +88,14 @@ def dibujar_panel(
         _dibujar(ejes[fila][0], a, f"{NOMBRES[clave]} antes", cmap, vmin, vmax)
         _dibujar(ejes[fila][1], d, f"{NOMBRES[clave]} despues", cmap, vmin, vmax)
         media = np.nanmean(delta) if np.isfinite(delta).any() else np.nan
+        escala = ESCALAS_DELTA[clave]
         _dibujar(
             ejes[fila][2],
             delta,
             f"delta {NOMBRES[clave]} (medio {media:+.3f})",
             "RdBu_r",
-            -0.4,
-            0.4,
+            -escala,
+            escala,
         )
 
     if titulo:

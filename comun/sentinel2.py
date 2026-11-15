@@ -47,8 +47,9 @@ STAC = "https://planetarycomputer.microsoft.com/api/stac/v1"
 #: Conjunto minimo para NDVI: rojo, infrarrojo cercano y la mascara de escena.
 BANDAS_NDVI = ("B04", "B08", "SCL")
 
-#: Conjunto para los tres indices: verde, rojo, NIR, SWIR y la mascara.
-BANDAS_INDICES = ("B03", "B04", "B08", "B11", "SCL")
+#: Conjunto para los indices: verde, rojo, NIR, SWIR1, SWIR2 y la mascara.
+#: SWIR2 (B12) entra por NBR: es la banda que separa dosel de suelo desnudo.
+BANDAS_INDICES = ("B03", "B04", "B08", "B11", "B12", "SCL")
 
 #: Subir esto invalida toda la cache en disco (cambia el prefijo de la clave).
 CACHE_VERSION = 1
@@ -307,9 +308,10 @@ def _calcular_indices(datos):
     ndvi = optico.ndvi(datos["B04"], datos["B08"])
     ndbi = optico.ndbi(datos["B11"], datos["B08"])
     ndwi = optico.ndwi(datos["B03"], datos["B08"])
-    for capa in (ndvi, ndbi, ndwi):
+    nbr = optico.nbr(datos["B08"], datos["B12"])
+    for capa in (ndvi, ndbi, ndwi, nbr):
         capa[~valida] = np.nan
-    return {"ndvi": ndvi, "ndbi": ndbi, "ndwi": ndwi}
+    return {"ndvi": ndvi, "ndbi": ndbi, "ndwi": ndwi, "nbr": nbr}
 
 
 def componer_ndvi(
@@ -349,10 +351,10 @@ def componer_indices(
     destino_crs,
     px: int,
 ) -> tuple[dict[str, np.ndarray] | None, list[dict]]:
-    """NDVI, NDBI y NDWI medianos, alineados a la grilla del recorte NISAR.
+    """NDVI, NDBI, NDWI y NBR medianos, alineados a la grilla del recorte NISAR.
 
-    Cuesta dos aperturas remotas mas por item que `componer_ndvi` (verde y SWIR),
-    por eso vive en su propia entrada de cache.
+    Cuesta tres aperturas remotas mas por item que `componer_ndvi` (verde, SWIR1
+    y SWIR2), por eso vive en su propia entrada de cache.
     """
     return _componer(
         items,
