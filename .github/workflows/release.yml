@@ -73,7 +73,10 @@ jobs:
             --generate-notes \
             --notes "Imagen publicada: \`ghcr.io/${GITHUB_REPOSITORY}:${GITHUB_REF_NAME#v}\`
 
-          Para correrla:
+          Cómo correrla (Docker Desktop o Docker Engine):
+
+          1. Abrí una terminal en una carpeta de trabajo y reemplazá las dos rutas por
+             carpetas reales de tu equipo:
 
           \`\`\`bash
           docker run --rm -p 127.0.0.1:8010:8010 \\
@@ -81,6 +84,13 @@ jobs:
             -v /ruta/a/artefactos:/app/nisar-app/var/media \\
             ghcr.io/${GITHUB_REPOSITORY}:${GITHUB_REF_NAME#v}
           \`\`\`
+
+          2. Abrí http://127.0.0.1:8010 en el navegador. La app no abre el navegador
+             sola y la terminal queda ocupada (agregá -d para correrla en segundo plano).
+
+          Opcional: para bajar los .h5 hace falta Earthdata. Creá un archivo .env con
+          EARTHDATA_USER y EARTHDATA_PASSWORD y agregá --env-file .env al comando. Sin
+          credenciales, la búsqueda de escenas y las imágenes browse funcionan igual.
 
           Datos: NASA/ISRO NISAR (ASF DAAC), ESA Copernicus Sentinel-2.
           Proyecto de participantes del NASA Space Apps Challenge; no es un producto de NASA."

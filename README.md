@@ -190,13 +190,18 @@ Cada release publica `ghcr.io/gillopy/nisar-canopy` con la etiqueta de la versi�
 docker run --rm -p 127.0.0.1:8010:8010 \
   -v /ruta/a/los/h5:/data/nisar \
   -v /ruta/a/artefactos:/app/nisar-app/var/media \
-  -e EARTHDATA_USER=tu_usuario \
-  -e EARTHDATA_PASSWORD=tu_clave \
   ghcr.io/gillopy/nisar-canopy:latest
 ```
 
-Después abrí `http://127.0.0.1:8010`. Sin las variables de Earthdata la app arranca igual:
-la búsqueda y el browse funcionan, solo no se pueden bajar los `.h5`.
+Reemplazá las dos rutas por carpetas reales de tu equipo. **Abrí `http://127.0.0.1:8010`** en
+el navegador: la app no lo abre sola y la terminal queda ocupada (con `-d` corre en segundo
+plano).
+
+Para bajar los `.h5` hace falta Earthdata: creá un archivo `.env` con `EARTHDATA_USER` y
+`EARTHDATA_PASSWORD`, y agregá `--env-file .env` al comando. Sin credenciales la app arranca
+igual y la búsqueda y el browse funcionan. Usá `--env-file` en vez de `-e
+EARTHDATA_PASSWORD=...`: un `-e` con la clave queda en el historial del shell y en la lista de
+procesos, y el archivo se puede proteger con permisos.
 
 ### Con los scripts
 
