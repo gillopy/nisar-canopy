@@ -200,6 +200,9 @@ export function NisarView() {
     huellasRef.current = L.layerGroup().addTo(mapa);
     mapaRef.current = mapa;
 
+    // El contorno del pais es opcional: `datos/paraguay_gadm.json` no se versiona
+    // (licencia GADM) y la imagen Docker no lo trae. Sin el archivo el mapa, las
+    // huellas y las cajas funcionan igual, asi que un 404 no se muestra como error.
     getParaguay()
       .then((datos: FeatureCollection) => {
         if (!mapaRef.current) return;
@@ -213,7 +216,7 @@ export function NisarView() {
           },
         }).addTo(mapaRef.current);
       })
-      .catch(() => setError("No se pudo cargar el contorno de Paraguay."));
+      .catch(() => undefined);
 
     return () => {
       mapa.remove();
