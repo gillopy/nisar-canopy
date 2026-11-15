@@ -22,6 +22,16 @@ interface Props {
 const PASO_TECLADO = 2;
 
 /**
+ * Rótulo de una capa: "Antes · 2026-06-28" con fecha, "Antes" sin fecha. El
+ * respaldo de la etiqueta ya dice "Antes", así que no se repite.
+ */
+function rotulo(prefijo: string, etiqueta: string): string {
+  return etiqueta && etiqueta.toLowerCase() !== prefijo.toLowerCase()
+    ? `${prefijo} · ${etiqueta}`
+    : prefijo;
+}
+
+/**
  * Comparador de barrido: las dos capas apiladas y una línea que se arrastra.
  *
  * A la izquierda se ve el antes; a la derecha, el después (con la máscara del
@@ -149,13 +159,14 @@ export function ComparadorBarrido({ antes, despues, titulo, alCerrar }: Props) {
             onPointerMove={alMover}
             onPointerUp={alSoltar}
             onPointerCancel={alSoltar}
+            onLostPointerCapture={() => setArrastrando(false)}
             onKeyDown={alTeclear}
           >
             <img
               ref={capa}
               className="barrido__capa"
               src={despues.url}
-              alt={`Después · ${despues.etiqueta}`}
+              alt={rotulo("Después", despues.etiqueta)}
               draggable={false}
               onLoad={() => medir(capa.current)}
             />
@@ -166,15 +177,15 @@ export function ComparadorBarrido({ antes, despues, titulo, alCerrar }: Props) {
               <img
                 className="barrido__imagen"
                 src={antes.url}
-                alt={`Antes · ${antes.etiqueta}`}
+                alt={rotulo("Antes", antes.etiqueta)}
                 draggable={false}
               />
             </div>
             <span className="barrido__sello barrido__sello--antes">
-              Antes · {antes.etiqueta}
+              {rotulo("Antes", antes.etiqueta)}
             </span>
             <span className="barrido__sello barrido__sello--despues">
-              Después · {despues.etiqueta}
+              {rotulo("Después", despues.etiqueta)}
             </span>
             <div
               className="barrido__linea"

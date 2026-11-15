@@ -50,3 +50,9 @@ Tests: `unittest` del backend (45, sin red) + `npm run build` (tsc + Vite).
   CSS compilado en Edge headless a 1280x900 y 410 px de columna. No se pudo correr un job
   real de cambio (necesita Earthdata + `.h5`): el camino completo pipeline → artefactos →
   visor queda pendiente de una corrida con datos.
+- **L5** — Verificación independiente (`gentle-ai-verify`), sin bloqueantes. Corregido: el
+  respaldo de la etiqueta duplicaba el prefijo ("Antes · Antes") y el arrastre podía quedar
+  colgado si se perdía el pointer capture (`onLostPointerCapture`). Conocido y no cambiado:
+  `jobs.py::_publicar` publica sólo el PNG más nuevo cuando ningún archivo quedó fresco; hoy
+  no se dispara en `cambio` porque la receta siempre agrega el render y el script reescribe
+  los tres PNG, pero si algún día se cachea el render el par no se publicaría.
