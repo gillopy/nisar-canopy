@@ -2,6 +2,11 @@
 
 FROM python:3.13-slim
 
+# uv instala desde los requirements exportados de uv.lock: mismas versiones que
+# en local y sin recalcular el arbol de dependencias. Version fijada a proposito
+# para que el build no cambie solo.
+COPY --from=ghcr.io/astral-sh/uv:0.13.8 /uv /bin/uv
+
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PIP_NO_CACHE_DIR=1 \
@@ -10,7 +15,8 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     CLIMATE3D_DATOS=/data \
     CLIMATE3D_NISAR=/data/nisar \
     CLIMATE3D_PYTHON=/usr/local/bin/python \
-    NISAR_S2_CACHE=/app/nisar-app/var/media/cache/s2
+    NISAR_S2_CACHE=/app/nisar-app/var/media/cache/s2 \
+    UV_PYTHON_DOWNLOADS=0
 
 # curl: healthcheck. libgomp1: wheel de rasterio/numpy.
 # libexpat1: el wheel de rasterio lo exige en runtime; sin el, el import falla
@@ -27,12 +33,12 @@ RUN apt-get update \
 WORKDIR /app
 
 # Dependencias primero: cambiar el codigo no reinstala todo.
-# Los requirements son un export fijado de uv.lock, asi que pip instala
-# exactamente las mismas versiones que uv resolvio en local.
+# `--system` instala en el Python de la imagen, que es el que usa la app
+# (CLIMATE3D_PYTHON). Los requirements son un export fijado de uv.lock.
 COPY requirements-pipeline.txt ./
 COPY nisar-app/requirements.txt ./backend-requirements.txt
-RUN pip install --upgrade pip \
- && pip install -r requirements-pipeline.txt -r backend-requirements.txt
+RUN uv pip install --system --no-cache \
+      -r requirements-pipeline.txt -r backend-requirements.txt
 
 # Pipeline compartido + app + frontend ya compilado.
 # prototipos/ incluye poster_indices.py (panel NDVI/NDBI/NDWI); matplotlib ya
