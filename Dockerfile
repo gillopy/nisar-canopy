@@ -27,6 +27,8 @@ RUN apt-get update \
 WORKDIR /app
 
 # Dependencias primero: cambiar el codigo no reinstala todo.
+# Los requirements son un export fijado de uv.lock, asi que pip instala
+# exactamente las mismas versiones que uv resolvio en local.
 COPY requirements-pipeline.txt ./
 COPY nisar-app/requirements.txt ./backend-requirements.txt
 RUN pip install --upgrade pip \

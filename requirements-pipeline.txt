@@ -1,12 +1,179 @@
-# Dependencias del pipeline NISAR (entorno de la raiz: .venv).
-# El backend usa su propio entorno: nisar-app/.venv.
-requests==2.34.*
-numpy==2.5.*
-pillow==13.0.*
-matplotlib==3.11.*
-h5py==3.16.*
-pyproj==3.8.*
-tifffile==2026.11.*
-rasterio==1.5.*
-pystac-client==0.9.*
-planetary-computer==1.*
+# GENERADO: no editar a mano. La fuente es pyproject.toml + uv.lock.
+# Regenerar:  uv export --format requirements-txt --no-hashes --no-emit-project --output-file <este archivo>
+
+affine==3.0.1
+    # via rasterio
+annotated-types==0.8.0
+    # via pydantic
+attrs==26.1.0
+    # via
+    #   affine
+    #   rasterio
+certifi==2026.10.23
+    # via
+    #   pyproj
+    #   rasterio
+    #   requests
+charset-normalizer==3.5.2
+    # via requests
+click==8.5.1
+    # via
+    #   planetary-computer
+    #   rasterio
+contourpy==1.4.0
+    # via matplotlib
+cycler==0.12.1
+    # via matplotlib
+fonttools==4.68.0
+    # via matplotlib
+h5py==3.16.0
+    # via nisar-canopy
+idna==3.20
+    # via requests
+kiwisolver==1.5.1
+    # via matplotlib
+matplotlib==3.11.2
+    # via nisar-canopy
+numpy==2.5.4
+    # via
+    #   contourpy
+    #   h5py
+    #   matplotlib
+    #   nisar-canopy
+    #   rasterio
+    #   tifffile
+packaging==26.3
+    # via
+    #   matplotlib
+    #   planetary-computer
+pillow==13.0.0
+    # via
+    #   matplotlib
+    #   nisar-canopy
+planetary-computer==1.0.0
+    # via nisar-canopy
+pydantic==2.14.3
+    # via planetary-computer
+pydantic-core==2.50.4
+    # via pydantic
+pyparsing==3.3.3
+    # via
+    #   matplotlib
+    #   rasterio
+pyproj==3.8.0
+    # via nisar-canopy
+pystac==1.16.0
+    # via
+    #   planetary-computer
+    #   pystac-client
+pystac-client==0.9.1
+    # via
+    #   nisar-canopy
+    #   planetary-computer
+pystac-core==1.16.0
+    # via
+    #   pystac
+    #   pystac-ext-classification
+    #   pystac-ext-datacube
+    #   pystac-ext-eo
+    #   pystac-ext-file
+    #   pystac-ext-grid
+    #   pystac-ext-item-assets
+    #   pystac-ext-label
+    #   pystac-ext-mgrs
+    #   pystac-ext-mlm
+    #   pystac-ext-pointcloud
+    #   pystac-ext-projection
+    #   pystac-ext-raster
+    #   pystac-ext-render
+    #   pystac-ext-sar
+    #   pystac-ext-sat
+    #   pystac-ext-scientific
+    #   pystac-ext-storage
+    #   pystac-ext-table
+    #   pystac-ext-timestamps
+    #   pystac-ext-version
+    #   pystac-ext-view
+    #   pystac-ext-xarray-assets
+pystac-ext-classification==2.0.2
+    # via
+    #   pystac
+    #   pystac-ext-mlm
+pystac-ext-datacube==2.2.2
+    # via pystac
+pystac-ext-eo==1.1.2
+    # via pystac
+pystac-ext-file==2.1.2
+    # via pystac
+pystac-ext-grid==1.1.2
+    # via pystac
+pystac-ext-item-assets==1.0.2
+    # via pystac
+pystac-ext-label==1.0.3
+    # via pystac
+pystac-ext-mgrs==1.0.2
+    # via pystac
+pystac-ext-mlm==1.4.2
+    # via pystac
+pystac-ext-pointcloud==1.0.2
+    # via pystac
+pystac-ext-projection==2.0.2
+    # via
+    #   pystac
+    #   pystac-ext-eo
+pystac-ext-raster==1.1.2
+    # via
+    #   pystac
+    #   pystac-ext-classification
+    #   pystac-ext-mlm
+pystac-ext-render==2.0.1
+    # via pystac
+pystac-ext-sar==1.0.2
+    # via pystac
+pystac-ext-sat==1.0.2
+    # via pystac
+pystac-ext-scientific==1.0.2
+    # via pystac
+pystac-ext-storage==2.0.2
+    # via pystac
+pystac-ext-table==1.2.2
+    # via pystac
+pystac-ext-timestamps==1.1.2
+    # via pystac
+pystac-ext-version==1.2.2
+    # via pystac
+pystac-ext-view==1.0.2
+    # via
+    #   pystac
+    #   pystac-ext-eo
+pystac-ext-xarray-assets==1.0.2
+    # via pystac
+python-dateutil==4.0.0
+    # via
+    #   matplotlib
+    #   pystac-client
+    #   pystac-core
+python-dotenv==1.2.4
+    # via planetary-computer
+pytz==2026.6
+    # via planetary-computer
+rasterio==1.5.2
+    # via nisar-canopy
+requests==2.34.2
+    # via
+    #   nisar-canopy
+    #   planetary-computer
+    #   pystac-client
+tifffile==2026.11.12
+    # via nisar-canopy
+typing-extensions==4.16.0
+    # via
+    #   pydantic
+    #   pydantic-core
+    #   typing-inspection
+typing-inspection==0.4.5
+    # via pydantic
+tzdata==2026.6
+    # via python-dateutil
+urllib3==2.8.0
+    # via requests

@@ -53,7 +53,8 @@ con 8, 97,8%, por 65% más de tiempo. Más ítems agregan poco salvo en zonas mu
 
 | Cosa | Para qué | Obligatorio |
 | --- | --- | --- |
-| **Python 3.11+** (probado en 3.13) | backend y pipeline | sí |
+| **Python 3.12+** (probado en 3.13) | backend y pipeline | sí, salvo que uses uv |
+| **uv** (opcional, recomendado) | crea los entornos en segundos y puede bajar el Python que falte | no |
 | **Node.js 20+** | recompilar el frontend | no, el build ya está incluido |
 | **Docker Desktop** | correr en contenedor | no |
 | **Cuenta Earthdata** (gratis) | bajar los `.h5` de ASF | no, solo para descargar |
@@ -61,16 +62,18 @@ con 8, 97,8%, por 65% más de tiempo. Más ítems agregan poco salvo en zonas mu
 Windows es el entorno soportado por los scripts `.bat`/`.ps1`. En Linux/macOS el backend
 corre igual, pero el arranque es a mano (ver *Modo manual*).
 
+> 3.11 **no** alcanza: `numpy 2.5` exige Python 3.12 o superior.
+
 ## Arranque rápido
 
 1. Cloná el repo.
 2. Doble clic en **`ARRANCAR.bat`**.
 
-Eso es todo. El script verifica Python, crea los dos entornos virtuales, instala las
-dependencias, te pregunta dónde guardar los datos, levanta el servidor y abre el navegador.
+El script detecta `uv` o Python, prepara los dos entornos, te pregunta dónde guardar los
+datos, levanta el servidor y abre el navegador.
 
-La primera vez tarda unos minutos (instala `rasterio`, `h5py`, `matplotlib`…). Las
-siguientes arranca en segundos.
+La primera vez tarda unos minutos si instala todo desde cero. **Con `uv` instalado son
+segundos**: resuelve desde `uv.lock` en vez de calcular versiones.
 
 Para apagarla: **`APAGAR.bat`**.
 
@@ -84,6 +87,34 @@ Para apagarla: **`APAGAR.bat`**.
 - **FIRMS MAP_KEY**: opcional, solo para el producto de incendio.
 
 Todo queda en dos archivos `.env` locales, que **no** se versionan.
+
+## Entornos: uv primero, pip como respaldo
+
+El repo tiene **dos proyectos independientes**, a propósito: el backend no tiene por qué
+cargar `rasterio` ni `matplotlib`.
+
+| Proyecto | Entorno | Dependencias |
+| --- | --- | --- |
+| raíz | `.venv` | pipeline de radar |
+| `nisar-app/` | `nisar-app/.venv` | API, uvicorn, cola de jobs |
+
+Cada uno declara sus dependencias en su `pyproject.toml` y las resuelve en su `uv.lock`.
+`.python-version` fija 3.13, que es la versión con la que está probado.
+
+```powershell
+uv sync                    # pipeline
+uv sync --directory nisar-app   # backend
+```
+
+**Si no tenés uv**, `setup.ps1` cae automáticamente a `venv` + `pip` con los
+`requirements-*.txt`. Esos archivos **no se editan a mano**: son un export fijado del lock.
+
+```powershell
+uv export --format requirements-txt --no-hashes --no-emit-project --output-file requirements-pipeline.txt
+```
+
+Para agregar una dependencia: editá el `pyproject.toml` correspondiente, `uv lock`, y volvé
+a exportar los requirements para que el camino sin uv siga funcionando.
 
 ## Modo Docker
 
@@ -106,6 +137,10 @@ La caché de Sentinel-2 vive dentro del volumen de artefactos
 junto con los artefactos. El límite administrativo de GADM no entra en la imagen
 (`.dockerignore`), así que el preset de Paraguay responde 404 igual que en un clon limpio.
 
+El build instala con **uv** (`uv pip install --system`) a partir de los requirements
+exportados de `uv.lock`: mismas versiones que en local, fijadas, y una instalación bastante
+más rápida que con `pip`.
+
 > La app ejecuta subprocesos y no tiene autenticación: escucha solo en loopback a propósito.
 > Para exponerla a Internet hace falta un proxy con HTTPS y, si es pública, un modo demo con
 > artefactos precalculados y límites de descarga.
@@ -121,9 +156,15 @@ junto con los artefactos. El límite administrativo de GADM no entra en la image
 En Linux/macOS, el equivalente:
 
 ```bash
+uv sync && uv sync --directory nisar-app
+nisar-app/.venv/bin/python -m uvicorn nisar_backend.main:app --app-dir nisar-app --port 8010
+```
+
+Sin uv, reemplazá la primera línea por:
+
+```bash
 python -m venv .venv && .venv/bin/pip install -r requirements-pipeline.txt
 python -m venv nisar-app/.venv && nisar-app/.venv/bin/pip install -r nisar-app/requirements.txt
-nisar-app/.venv/bin/python -m uvicorn nisar_backend.main:app --app-dir nisar-app --port 8010
 ```
 
 ## Configuración
@@ -168,25 +209,29 @@ búsquedas reales contra ASF se comprueban a mano.
 ├── ARRANCAR-LOCAL.bat    alias de ARRANCAR.bat sin argumentos
 ├── APAGAR.bat            baja el contenedor o el servidor local
 ├── configurar.ps1        asistente: carpetas, credenciales y puerto
-├── setup.ps1             crea los dos venv e instala dependencias
+├── setup.ps1             prepara los dos entornos (uv, o pip de respaldo)
 ├── run.ps1               levanta uvicorn con la config del .env
+├── pyproject.toml        dependencias del pipeline (fuente de verdad)
+├── uv.lock               resolucion fijada del pipeline
+├── .python-version       3.13
+├── requirements-pipeline.txt   export fijado, para pip/Docker
 ├── Dockerfile            imagen de la app
 ├── docker-compose.yml    servicio con volumenes y healthcheck
-├── requirements-pipeline.txt   dependencias del pipeline (venv raiz)
 ├── comun/                kit NISAR, rutas, Sentinel-2, optico, FIRMS
 ├── descargar/            descarga de escenas desde ASF
 ├── prototipos/           renderizadores NISAR (GCOV, SME2, GUNW)
 ├── datos/                recursos auxiliares del pipeline
 └── nisar-app/
+    ├── pyproject.toml    dependencias del backend
+    ├── uv.lock           resolucion fijada del backend
     ├── nisar_backend/    FastAPI: API + cola de jobs
     ├── frontend/         React + Leaflet (src y dist)
     ├── tests/
-    └── requirements.txt  dependencias del backend (venv propio)
+    └── requirements.txt  export fijado, para pip/Docker
 ```
 
-La app usa **dos entornos separados** a propósito: el backend (FastAPI) y el pipeline
-(rasterio, h5py, matplotlib). Si arrancás el backend con el Python equivocado vas a ver
-`No module named uvicorn`.
+Aunque `uv sync` cree un `.venv` sin `pip`, los requirements siguen existiendo para el
+camino de respaldo y para la imagen Docker.
 
 ## Datos y créditos
 
@@ -219,6 +264,8 @@ El resto de la app funciona sin ese archivo.
   el propio contenedor, lo recrea solo.
 - **`FileNotFoundError` en la carpeta de datos**: la unidad o la ruta no existe (por ejemplo,
   un disco externo desconectado). Volvé a correr `configurar.ps1` y elegí una carpeta local.
+- **`python` abre la Microsoft Store**: es el alias falso de Windows, no un intérprete. Con
+  `uv` instalado el problema desaparece; si no, instalá Python desde python.org.
 - **Docker no responde**: `ARRANCAR.bat docker` espera hasta 3 minutos. Si no arranca, abrí
   Docker Desktop hasta que diga "Engine running" y reintentá.
 - **Datos y artefactos en la misma carpeta**: funciona, pero conviene separarlos
